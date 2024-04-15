@@ -1,8 +1,8 @@
 fn main() {
-    slice();
-    ownership();
-    escape();
-    utf8();
+    // slice();
+    // ownership();
+    // escape();
+    // utf8();
 }
 
 fn slice() {
@@ -90,6 +90,15 @@ fn escape() {
     let s4 = r##"I'm writing \x52\x75\x73\x74! "# "No escape""##;
 
     println!("{}", s4);
+
+    let s5: &[u8; 21] = b"this is a byte string";
+    println!("A byte string: {:?}", s5);
+
+    let s6 = b"\x52\x75\x73\x74 as bytes";
+    println!("Some escaped bytes: {:?}", s6);
+
+    let s7 = br"\u{211D} is not escaped here";
+    println!("{:?}", s7);
 }
 
 fn utf8() {
