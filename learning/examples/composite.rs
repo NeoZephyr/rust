@@ -39,16 +39,59 @@ struct User {
     ttl: u64,
 }
 
+#[derive(Debug, Default)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    fn area1(self: Self) -> u32 {
+        self.width * self.height
+    }
+
+    fn area2(self: &Self) -> u32 {
+        self.width * self.height
+    }
+
+    fn area3(self: &mut Self) -> u32 {
+        self.width * self.height
+    }
+}
+
+impl Rectangle {
+    fn can_hold(&self, other: &Rectangle) -> bool {
+        self.width > other.width && self.height > other.height
+    }
+
+    // 关联函数（静态方法）
+    fn numbers(rows: u32, cols: u32) -> u32 {
+        rows * cols
+    }
+}
+
+impl Rectangle {
+    pub fn new(width: u32, height: u32) -> Self {
+        Rectangle {
+            width,
+            height
+        }
+    }
+}
+
+// 匿名结构体，也叫做元组结构体
 #[derive(Debug)]
 struct Color(i32, i32, i32);
 
+// 单元结构体
 #[derive(Debug)]
 struct Pie;
 
 fn structure() {
+    let name = String::from("jack");
     let mut u1 = User {
         active: true,
-        name: String::from("jack"),
+        name,
         email: String::from("jack@qq.com"),
         ttl: 3600
     };
@@ -58,7 +101,7 @@ fn structure() {
     };
     u1.active = false;
 
-    // value borrowed here after partial move
+    // 部分移动
     // println!("u1: {:?}", u1);
     println!("u2: {:?}", u2);
 
@@ -68,6 +111,24 @@ fn structure() {
     let pie = Pie;
 
     println!("pie: {:?}", pie);
+
+    let rect1 = Rectangle {
+        width: 3,
+        height: 4,
+    };
+    let rect2 = Rectangle::new(5, 9);
+    let rect3 = Rectangle::default();
+    let rect4: Rectangle = Default::default();
+    let r1 = &rect1;
+    let r2 = &&rect1;
+
+    // println!("area of rectangle: {}", rect1.area1());
+    println!("area of rectangle: {}", r1.area2());
+    println!("area of rectangle: {}", r2.area2());
+
+    println!("rect2: {:?}, rect3: {:?}, rect4: {:?}", rect2, rect3, rect4);
+
+    Rectangle::numbers(10, 10);
 }
 
 fn vector() {
