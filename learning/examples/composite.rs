@@ -5,6 +5,9 @@ fn main() {
     array();
     structure();
     enumeration();
+    match_case1();
+    match_case2();
+    match_case3();
 }
 
 fn tuple() {
@@ -29,6 +32,22 @@ fn array() {
     println!("{:?}", months);
 
     println!("{:?} {:?} {:?} {:?}", colors, scores, words, &colors[1..4])
+}
+
+fn vector() {
+    let vec: Vec<i32> = Vec::new();
+    let vec = vec![1, 2, 3];
+    let mut vec = Vec::new();
+    vec.push(10);
+    vec.push(20);
+    println!("{:?}", vec)
+}
+
+fn hash() {
+    let mut map = HashMap::new();
+    map.insert(String::from("jack"), 30);
+    map.insert(String::from("jhon"), 50);
+    println!("{:?}", map)
 }
 
 #[derive(Debug)]
@@ -131,27 +150,38 @@ fn structure() {
     Rectangle::numbers(10, 10);
 }
 
-fn vector() {
-    let vec: Vec<i32> = Vec::new();
-    let vec = vec![1, 2, 3];
-    let mut vec = Vec::new();
-    vec.push(10);
-    vec.push(20);
-    println!("{:?}", vec)
+#[cfg(test)]
+mod tests {
+    use crate::Rectangle;
+
+    #[test]
+    fn test_rectangle() {
+        let r = Rectangle {
+            width: 10,
+            height: 10,
+        };
+
+        assert_ne!(r.area(), 100)
+    }
 }
 
-fn hash() {
-    let mut  map = HashMap::new();
-    map.insert(String::from("jack"), 30);
-    map.insert(String::from("jhon"), 50);
-    println!("{:?}", map)
-}
-
+#[derive(Debug)]
 enum Gender {
     Male,
     Female
 }
 
+// 空枚举，不能被实例化
+enum Foo {}
+
+// 给枚举变体一个起始数字值
+enum Number {
+    Zero = 0,
+    One,
+    Two,
+}
+
+#[derive(Debug)]
 enum PokerCard {
     Clubs(u8),
     Spades(u8),
@@ -159,30 +189,173 @@ enum PokerCard {
     Hearts(char),
 }
 
-struct Ipv4Addr {}
+// enum 中的变体可以挂载各种形式的类型
+#[derive(Debug)]
+enum Shape {
+    // 把结构体 Rectangle 挂载到 Rectangle 变体上
+    Rectangle(Rectangle),
 
-struct Ipv6Addr {}
+    // 挂载一个元组负载
+    Triangle((u32, u32), (u32, u32), (u32, u32)),
 
-enum IpAddr {
-    V4(Ipv4Addr),
-    V6(Ipv6Addr)
+    // 挂载了一个结构体负载，表示一个原点加半径长度
+    Circle {origin: (u32, u32), radius: u32},
+}
+
+impl Shape {
+    fn area(&self) -> u32 {
+        match self {
+            Shape::Rectangle(r) => {
+                r.width * r.height
+            }
+            _ => 0
+        }
+    }
+}
+
+#[derive(Debug)]
+enum WebEvent {
+    PageLoad,
+    KeyPress(char),
+    Paste(String),
+    Click { x: i64, y: i64 },
 }
 
 fn enumeration() {
     let man = Gender::Male;
     let woman = Gender::Female;
-    let c1 = PokerCard::Clubs(5);
-    let c2 = PokerCard::Diamonds('K');
 
-    let x1 = Some(5);
-    let x2: Option<i32> = None;
-    let x3 = incr(x1);
-    let x4 = incr(x2);
+    println!("man gender is {:?}, woman gender is {:?}", man, woman);
+
+    println!("One is {}", Number::One as u32);
+
+    println!("card1 is {:?}, card2 is {:?}", PokerCard::Clubs(7), PokerCard::Diamonds('Q'));
+
+    let e1 = WebEvent::PageLoad;
+    let e2 = WebEvent::KeyPress('A');
+    let e3 = WebEvent::Paste(String::from("abc"));
+    let e4 = WebEvent::Click {x: 10, y: 10};
+
+    println!("event1 is {:?}, event2 is {:?}, event3 is {:?}, event4 is {:?}", e1, e2, e3, e4);
+
+    println!("rectangle shape is {:?}", Shape::Rectangle(Rectangle{width: 10, height: 20}));
+
+    println!("triangle shape is {:?}", Shape::Triangle((1, 1), (2, 2), (10, 5)));
+
+    println!("circle shape is {:?}", Shape::Circle {origin: (1, 1), radius: 1});
 }
 
-fn incr(x: Option<i32>) -> Option<i32> {
-    match x {
-        None => None,
-        Some(i) => Some(i + 1)
+fn match_case1() {
+    let rect = Shape::Rectangle(Rectangle { width: 10, height: 20 });
+
+    // match 表达式中各个分支返回的值的类型必须相同
+    // 所有分支都必须处理
+    let ret = match rect {
+        Shape::Rectangle(_) => 1,
+        Shape::Triangle(_, _, _) => 2,
+        Shape::Circle { origin: (_, _), radius: _ } => 3,
+    };
+
+    if let Shape::Triangle(_, _, _) = rect {
+        println!("is triangle")
+    } else {
+        println!("is not triangle")
     }
+
+    let mut value = Some(100);
+
+    if let Some(v) = value {
+        println!("value is {v}")
+    }
+
+    while let Some(v) = value {
+        if v > 0 {
+            println!("value is {v}");
+            value = Some(v / 2);
+        } else {
+            value = None
+        }
+    }
+}
+
+fn match_case2() {
+    let number = 13;
+
+    match number {
+        1 => println!("number 1"),
+        2 | 3 | 5 | 7 | 11 | 13 => println!("prime number"),
+        14..=99 => println!("less than 100"),
+        _ => println!("grater number")
+    }
+}
+
+fn match_case3() {
+    let rect = Shape::Rectangle(Rectangle { width: 10, height: 20 });
+
+    // 利用模式匹配解开负载
+    let Shape::Rectangle(r) = rect else {
+        panic!("can not extract rect")
+    };
+    println!("rect width: {}, height: {}", r.width, r.height);
+
+    let circle = Shape::Circle {origin: (1, 1), radius: 10};
+
+    // 解开负载，同时定义了 origin 和 radius 两个局部变量
+    let Shape::Circle {origin, radius} = circle else {
+        panic!("can not extract circle")
+    };
+    println!("circle origin: ({}, {}), radius: {}", origin.0, origin.1, radius);
+
+    // 解开结构体负载
+    let rect = Rectangle {width: 10, height: 20};
+    let Rectangle {width, height} = rect;
+    println!("rect width: {}, height: {}", width, height);
+
+    // 模式中的变量名不必与结构体中的字段名一致
+    let r @ Rectangle {width: w, height: h} = rect;
+    println!("rect width: {}, height: {}", w, h);
+    println!("rect: {:?}", r);
+
+    let mut user = User {
+        name: String::from("jack"),
+        email: String::from("abc@qq.com"),
+        ttl: 100,
+        active: true
+    };
+
+    // ttl 和 active 采用了复制所有权的形式
+    // name 和 email 字符串值则是采用了移动所有权的形式
+    // 通过 ref 这个关键字修饰符告诉 Rust 编译器，现在只需要获得那个字段的引用，不需要所有权
+    let User {ref name, ref mut email, ttl, active} = user;
+    println!("user name: {}, active: {}, user: {:?}", name, active, user);
+
+    foo(user);
+
+    // 元组的析构，常用来从函数的多个返回值里取出数据
+    let tup = ("jack", 165, 60);
+    let (name, height, weight) = tup;
+    println!("name: {}, height: {}, weight: {}", name, height, weight);
+
+    bar(tup);
+}
+
+fn foo(User {name, email, active, ttl}: User) {
+    println!("user name: {name}, email: {email}, active: {active}, ttl: {ttl}")
+}
+
+fn bar((name, height, weight): (&str, u32, u32)) {
+    println!("name: {}, height: {}, weight: {}", name, height, weight)
+}
+
+fn closure() {
+    // 闭包
+    let square = |x: u32| -> u32 {x * x};
+    println!("square of 5: {}", square(5));
+
+    // 闭包可以捕获函数中的局部变量
+    let factor = 10;
+
+    // fn multiply_v1(x: u32) -> u32 {x * factor}
+    let multiply_v2 = |x| {x * factor};
+    println!("multiply 12: {}", multiply_v2(12))
 }

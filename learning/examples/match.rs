@@ -7,7 +7,6 @@ fn main() {
     play(Action::Shot);
     play(Action::Pass(String::from("jack")));
 
-    if_match();
     filter_ipv4();
     ignore_match();
 }
@@ -73,27 +72,4 @@ fn ignore_match() {
         // .. 忽略剩余值
         Point {x, ..} => println!("point x axis location: {}", x)
     }
-}
-
-fn if_match () {
-    let v = Some(1000);
-    match v {
-        Some(i) => println!("value: {}", i),
-        _ => (),
-    }
-
-    // 只要匹配一个条件
-    if let Some(i) = v {
-        println!("value: {}", i)
-    }
-
-    let p1 = Point { x: 20, y: 60, z: 100 };
-
-    let Point { x, y, z} = p1;
-    println!("point location: ({}, {}, {})", x, y, z);
-
-    // 模式中的变量名不必与结构体中的字段名一致
-    let p2 @ Point {x: a, y: b, z} = p1;
-    println!("point location: ({}, {}, {})", a, b, z);
-    println!("point p2: {:?}", p2)
 }
